@@ -1,0 +1,48 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "2.2.0.0",
+  "parameters": {
+    "customAssignableScopes": {
+      "value": []
+    },
+    "customRolePermissions": {
+      "value": []
+    },
+    "keyVaultPermissionsKeys": {
+      "value": [
+        "get",
+        "list"
+      ]
+    },
+    "keyVaultPermissionsSecrets": {
+      "value": [
+        "get",
+        "list"
+      ]
+    },
+    "roleDescription": {
+      "value": "Role created by the Access template."
+    },
+    "roleName": {
+      "value": ""
+    },
+    "secretId": {
+      "value": ""
+    },
+    "solutionType": {
+      "value": "standard"
+    },
+    "tagValues": {
+      "value": {
+        "application": "APP",
+        "cost": "COST",
+        "environment": "ENV",
+        "group": "GROUP",
+        "owner": "OWNER"
+      }
+    },
+    "userAssignedIdentityName": {
+      "value": ""
+    }
+  }
+}

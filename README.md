@@ -1,1 +1,1 @@
-# f5-azure-arm-templates-v2 custom deployment
+# F5 Azure ARM Templates
