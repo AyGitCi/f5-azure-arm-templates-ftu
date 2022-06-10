@@ -551,7 +551,12 @@
       "properties": {
         "supportsHttpsTrafficOnly": true,
         "networkAcls": {
+          "resourceAccessRules": [],
+          "bypass": "AzureServices",
+          "virtualNetworkRules": [],
+          "ipRules": [],
           "defaultAction": "Deny"
+        }
       },
       "sku": {
         "name": "Standard_LRS",
