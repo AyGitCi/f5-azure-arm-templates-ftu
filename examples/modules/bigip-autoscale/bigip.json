@@ -550,6 +550,8 @@
       "name": "[variables('diagnosticsStorageAccountName')]",
       "properties": {
         "supportsHttpsTrafficOnly": true
+        "networkAcls:{
+          "defaultAction": "Deny"
       },
       "sku": {
         "name": "Standard_LRS",
