@@ -549,8 +549,8 @@
       "location": "[resourceGroup().location]",
       "name": "[variables('diagnosticsStorageAccountName')]",
       "properties": {
-        "supportsHttpsTrafficOnly": true
-        "networkAcls:{
+        "supportsHttpsTrafficOnly": true,
+        "networkAcls": {
           "defaultAction": "Deny"
       },
       "sku": {
