@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "2.3.0.0",
+    "parameters": {
+        "userAssignedIdentityName": {
+            "defaultValue": "",
+            "type": "String",
+            "metadata": {
+                "description": "Name for user assigned identity. This is required for creating Azure User Assigned Identity."
+            }
+        }
+	},
+    "variables": {
+        "createUserAssignedIdentity": "[not(empty(parameters('userAssignedIdentityName')))]",
+        "tenantId": "[subscription().tenantId]",
+        "userAssignedIdentityName": "[if(variables('createUserAssignedIdentity'), parameters('userAssignedIdentityName'), concat(resourceGroup().name, '-identity'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+            "apiVersion": "2018-11-30",
+            "name": "[variables('userAssignedIdentityName')]",
+            "location": "[resourceGroup().location]"
+        }
+    ],
+    "outputs": {
+        "userAssignedIdentityId": {
+            "condition": "[variables('createUserAssignedIdentity')]",
+            "type": "String",
+            "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities/', variables('userAssignedIdentityName'))]"
+        }
+    }
+}
