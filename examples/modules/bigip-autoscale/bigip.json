@@ -553,7 +553,13 @@
         "networkAcls": {
           "resourceAccessRules": [],
           "bypass": "AzureServices",
-          "virtualNetworkRules": [],
+          "virtualNetworkRules": [
+            {
+              "id": "/subscriptions/c8da9810-2e85-4a8a-b614-fe0695ec0371/resourceGroups/azu-dev-rgp-1012/providers/Microsoft.Network/virtualNetworks/hub-dev-net-1301/subnets/azu-dev-sub-1301",
+              "action": "Allow",
+              "state": "Succeeded"
+            }
+          ],
           "ipRules": [],
           "defaultAction": "Deny"
         }
