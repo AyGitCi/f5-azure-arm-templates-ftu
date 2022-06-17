@@ -531,28 +531,6 @@
         },
         {
             "apiVersion": "2020-06-01",
-            "condition": "[not(equals(toLower(parameters('externalLoadBalancerName')), string('none')))]",
-            "dependsOn": [
-                "apppipcopy"
-            ],
-            "location": "[resourceGroup().location]",
-            "name": "[if(not(equals(tolower(parameters('externalLoadBalancerName')), string('none'))), parameters('externalLoadBalancerName'), string('none1'))]",
-            "properties": {
-                "backendAddressPools": "[variables('loadBalancerBackEndArray')]",
-                "frontendIPConfigurations": "[variables('appLoadBalancerFrontEnd')]",
-                "inboundNatPools": "[if(equals(parameters('numberPublicMgmtIpAddresses'), 0), json('null'), variables('inboundNatPoolsArray'))]",
-                "loadBalancingRules": "[variables('loadBalancingRulesArray')]",
-                "outboundRules": "[if(equals(parameters('numberPublicMgmtIpAddresses'), 0), json('null'), variables('outboundRuleConfigArray'))]",
-                "probes": "[variables('loadBalancingProbesArray')]"
-            },
-            "sku": {
-                "name": "Standard"
-            },
-            "tags": "[if(empty(parameters('tagValues')), json('null'), parameters('tagValues'))]",
-            "type": "Microsoft.Network/loadBalancers"
-        },
-        {
-            "apiVersion": "2020-06-01",
             "condition": "[not(equals(toLower(parameters('internalLoadBalancerName')), string('none')))]",
             "location": "[resourceGroup().location]",
             "name": "[parameters('internalLoadBalancerName')]",
