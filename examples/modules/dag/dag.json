@@ -8,13 +8,6 @@
             },
             "type": "string"
         },
-        "externalLoadBalancerName": {
-            "defaultValue": "None",
-            "metadata": {
-                "description": "Valid values include 'None', or an external load balancer name. A value of 'None' will not create external load balancer. Specifying a name creates a external load balancer with the name specified."
-            },
-            "type": "string"
-        },
         "internalLoadBalancerName": {
             "defaultValue": "None",
             "metadata": {
