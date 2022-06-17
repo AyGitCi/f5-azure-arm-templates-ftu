@@ -90,26 +90,6 @@
                 "description": "Valid values include an array containing network security rule property objects, or an empty array. A non-empty array value creates a security group and inbound rules using the destinationPortRanges and sourceAddressPrefix values provided for each object."
             }
         },
-        "numberPublicExternalIpAddresses": {
-            "defaultValue": 1,
-            "allowedValues": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10
-            ],
-            "metadata": {
-                "description": "Enter the number of public external ip address to create. At least one is required to build ELB."
-            },
-            "type": "int"
-        },
         "numberPublicMgmtIpAddresses": {
             "defaultValue": 0,
             "allowedValues": [
@@ -145,56 +125,7 @@
         }
     },
     "variables": {
-        "appLoadBalancerFrontEnd": "[if(equals(parameters('numberPublicMgmtIpAddresses'), 0), variables('constructFrontEndIPConfigID'), union(variables('constructFrontEndIPConfigID'), variables('mgmtLoadBalancerFrontEnd')))]",
         "copy": [
-            {
-                "count": "[parameters('numberPublicExternalIpAddresses')]",
-                "input": {
-                    "name": "[concat('loadBalancerFrontEnd', copyIndex('constructFrontEndIPConfigID'))]",
-                    "properties": {
-                        "publicIPAddress": {
-                            "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('uniqueString'), '-app-pip', copyIndex('constructFrontEndIPConfigID')))]"
-                        }
-                    }
-                },
-                "name": "constructFrontEndIPConfigID"
-            },
-            {
-                "count": "[variables('loadBalancerRulePortsLength')]",
-                "input": {
-                    "name": "[concat('app-', parameters('loadBalancerRulePorts')[copyIndex('constructLoadBalancerRule')])]",
-                    "properties": {
-                        "backendAddressPool": {
-                            "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('externalLoadBalancerName'), 'loadBalancerBackEnd')]"
-                        },
-                        "backendPort": "[parameters('loadBalancerRulePorts')[copyIndex('constructLoadBalancerRule')]]",
-                        "frontendIPConfiguration": {
-                            "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', parameters('externalLoadBalancerName'), 'loadBalancerFrontEnd0')]"
-                        },
-                        "frontendPort": "[parameters('loadBalancerRulePorts')[copyIndex('constructLoadBalancerRule')]]",
-                        "idleTimeoutInMinutes": 15,
-                        "loadDistribution": "SourceIP",
-                        "probe": {
-                            "id": "[resourceId('Microsoft.Network/loadBalancers/probes', parameters('externalLoadBalancerName'), concat('tcp_probe_', parameters('loadBalancerRulePorts')[copyIndex('constructLoadBalancerRule')]))]"
-                        },
-                        "protocol": "Tcp"
-                    }
-                },
-                "name": "constructLoadBalancerRule"
-            },
-            {
-                "count": "[variables('loadBalancerRulePortsLength')]",
-                "input": {
-                    "name": "[concat('tcp_probe_', parameters('loadBalancerRulePorts')[copyIndex('constructLoadBalancerProbes')])]",
-                    "properties": {
-                        "intervalInSeconds": 15,
-                        "numberOfProbes": 3,
-                        "port": "[parameters('loadBalancerRulePorts')[copyIndex('constructLoadBalancerProbes')]]",
-                        "protocol": "Tcp"
-                    }
-                },
-                "name": "constructLoadBalancerProbes"
-            },
             {
                 "count": "[variables('loadBalancerRulePortsLength')]",
                 "input": {
@@ -324,58 +255,9 @@
         ],
         "uniqueString": "[toLower(parameters('uniqueString'))]",
         "emptyArray": [],
-        "inboundNatPoolsArray": [
-            {
-                "name": "sshnatpool",
-                "properties": {
-                    "backendPort": 22,
-                    "frontendIPConfiguration": {
-                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', parameters('externalLoadBalancerName'), 'loadBalancerMgmtFrontEnd')]"
-                    },
-                    "frontendPortRangeEnd": 50100,
-                    "frontendPortRangeStart": 50001,
-                    "protocol": "Tcp"
-                }
-            },
-            {
-                "name": "mgmtnatpool",
-                "properties": {
-                    "backendPort": 8443,
-                    "frontendIPConfiguration": {
-                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', parameters('externalLoadBalancerName'), 'loadBalancerMgmtFrontEnd')]"
-                    },
-                    "frontendPortRangeEnd": 50200,
-                    "frontendPortRangeStart": 50101,
-                    "protocol": "Tcp"
-                }
-            }
-        ],
-        "loadBalancerBackEnd": [
-            {
-                "name": "loadBalancerBackEnd"
-            }
-        ],
-        "loadBalancerBackEndArray": "[if(equals(parameters('numberPublicMgmtIpAddresses'), 0), variables('loadBalancerBackEnd'), union(variables('loadBalancerBackEnd'), variables('loadBalancerMgmtBackEnd')))]",
-        "loadBalancerMgmtBackEnd": [
-            {
-                "name": "loadBalancerMgmtBackEnd"
-            }
-        ],
         "loadBalancerRulePortsLength": "[length(parameters('loadBalancerRulePorts'))]",
-        "loadBalancingProbesArray": "[variables('constructLoadBalancerProbes')]",
-        "loadBalancingRulesArray": "[variables('constructLoadBalancerRule')]",
         "loadBalancingProbesArrayInternal": "[variables('constructLoadBalancerProbesInternal')]",
         "loadBalancingRulesArrayInternal": "[variables('constructLoadBalancerRuleInternal')]",
-        "mgmtLoadBalancerFrontEnd": [
-            {
-                "name": "loadBalancerMgmtFrontEnd",
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('uniqueString'), '-mgmt-pip0'))]"
-                    }
-                }
-            }
-        ],
         "nsg0Array": "[variables('constructNsg0Array')]",
         "nsg0Id": "[if(greater(variables('nsg0Length'), 0), createArray(resourceId('Microsoft.Network/networkSecurityGroups', variables('nsg0Name'))), variables('emptyArray'))]",
         "nsg0Length": "[length(parameters('nsg0'))]",
@@ -409,22 +291,6 @@
                     "protocol": "Tcp",
                     "sourceAddressPrefix": "*",
                     "sourcePortRange": "*"
-                }
-            }
-        ],
-        "outboundRuleConfigArray": [
-            {
-                "name": "outboundRuleForInit",
-                "properties": {
-                    "backendAddressPool": {
-                        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('externalLoadBalancerName'), 'loadBalancerMgmtBackEnd')]"
-                    },
-                    "frontendIPConfigurations": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', parameters('externalLoadBalancerName'), 'loadBalancerMgmtFrontEnd')]"
-                        }
-                    ],
-                    "protocol": "All"
                 }
             }
         ]
@@ -509,28 +375,6 @@
         },
         {
             "apiVersion": "2020-06-01",
-            "condition": "[greater(parameters('numberPublicExternalIpAddresses'), 0)]",
-            "copy": {
-                "count": "[parameters('numberPublicExternalIpAddresses')]",
-                "name": "apppipcopy"
-            },
-            "location": "[resourceGroup().location]",
-            "name": "[concat(variables('uniqueString'), '-app-pip', copyIndex())]",
-            "properties": {
-                "dnsSettings": {
-                    "domainNameLabel": "[concat(variables('uniqueString'), '-app', copyIndex(0))]"
-                },
-                "idleTimeoutInMinutes": 30,
-                "publicIPAllocationMethod": "Static"
-            },
-            "sku": {
-                "name": "Standard"
-            },
-            "tags": "[if(empty(parameters('tagValues')), json('null'), parameters('tagValues'))]",
-            "type": "Microsoft.Network/publicIPAddresses"
-        },
-        {
-            "apiVersion": "2020-06-01",
             "condition": "[not(equals(toLower(parameters('internalLoadBalancerName')), string('none')))]",
             "location": "[resourceGroup().location]",
             "name": "[parameters('internalLoadBalancerName')]",
@@ -562,89 +406,6 @@
         }
     ],
     "outputs": {
-        "externalIpIds": {
-            "condition": "[greater(parameters('numberPublicExternalIpAddresses'), 0)]",
-            "copy": {
-                "count": "[parameters('numberPublicExternalIpAddresses')]",
-                "input": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('uniqueString'), '-app-pip', copyIndex()))]"
-            },
-            "type": "array"
-        },
-        "externalIps": {
-            "condition": "[greater(parameters('numberPublicExternalIpAddresses'), 0)]",
-            "copy": {
-                "count": "[parameters('numberPublicExternalIpAddresses')]",
-                "input": "[reference(resourceId('Microsoft.Network/publicIPAddresses', concat(variables('uniqueString'), '-app-pip', copyIndex()))).ipAddress]"
-            },
-            "type": "array"
-        },
-        "externalIpDns": {
-            "condition": "[greater(parameters('numberPublicExternalIpAddresses'), 0)]",
-            "copy": {
-                "count": "[parameters('numberPublicExternalIPAddresses')]",
-                "input": "[reference(resourceId('Microsoft.Network/publicIPAddresses', concat(variables('uniqueString'), '-app-pip', copyIndex()))).dnsSettings.fqdn]"
-            },
-            "type": "array"
-        },
-        "externalBackEndLoadBalancerId": {
-            "condition": "[not(equals(toLower(parameters('externalLoadBalancerName')), string('none')))]",
-            "type": "string",
-            "value": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('externalLoadBalancerName'), 'loadBalancerBackEnd')]"
-        },
-        "externalBackEndMgmtLoadBalancerId": {
-            "condition": "[and(not(equals(toLower(parameters('externalLoadBalancerName')), string('none'))), greater(parameters('numberPublicMgmtIpAddresses'), 0))]",
-            "type": "string",
-            "value": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('externalLoadBalancerName'), 'loadBalancerMgmtBackEnd')]"
-        },
-        "externalFrontEndLoadBalancerId": {
-            "condition": "[not(equals(toLower(parameters('externalLoadBalancerName')), string('none')))]",
-            "copy": {
-                "count": "[parameters('numberPublicExternalIpAddresses')]",
-                "input": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('externalLoadBalancerName'), concat('loadBalancerFrontEnd', copyIndex()))]"
-            },
-            "type": "array"
-        },
-        "externalFrontEndLoadBalancerInboundId": {
-            "condition": "[and(not(equals(toLower(parameters('externalLoadBalancerName')), string('none'))), equals(parameters('numberPublicMgmtIpAddresses'), 0))]",
-            "type": "string",
-            "value": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('externalLoadBalancerName'), 'loadBalancerMgmtFrontEnd')]"
-        },
-        "externalFrontEndMgmtLoadBalancerId": {
-            "condition": "[and(not(equals(toLower(parameters('externalLoadBalancerName')), string('none'))), greater(parameters('numberPublicMgmtIpAddresses'), 0))]",
-            "type": "string",
-            "value": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('externalLoadBalancerName'), 'loadBalancerMgmtFrontEnd')]"
-        },
-        "externalLoadBalancer": {
-            "condition": "[not(equals(toLower(parameters('externalLoadBalancerName')), string('none')))]",
-            "type": "string",
-            "value": "[resourceId('Microsoft.Network/loadBalancers', parameters('externalLoadBalancerName'))]"
-        },
-        "externalLoadBalancerProbesId": {
-            "condition": "[not(equals(toLower(parameters('externalLoadBalancerName')), string('none')))]",
-            "copy": {
-                "count": "[variables('loadBalancerRulePortsLength')]",
-                "input": "[resourceId('Microsoft.Network/loadBalancers/probes', parameters('externalLoadBalancerName'), concat('tcp_probe_', parameters('loadBalancerRulePorts')[copyIndex()]))]"
-            },
-            "type": "array"
-        },
-        "externalLoadBalancerRulesId": {
-            "condition": "[not(equals(toLower(parameters('externalLoadBalancerName')), string('none')))]",
-            "copy": {
-                "count": "[variables('loadBalancerRulePortsLength')]",
-                "input": "[resourceId('Microsoft.Network/loadBalancers/loadBalancingRules', parameters('externalLoadBalancerName'), concat('app-', parameters('loadBalancerRulePorts')[copyIndex()]))]"
-            },
-            "type": "array"
-        },
-        "inboundMgmtNatPool": {
-            "condition": "[and(not(equals(toLower(parameters('externalLoadBalancerName')), string('none'))), greater(parameters('numberPublicMgmtIpAddresses'), 0))]",
-            "type": "string",
-            "value": "[resourceId('Microsoft.Network/loadBalancers/inboundNatPools', parameters('externalLoadBalancerName'), 'mgmtnatpool')]"
-        },
-        "inboundSshNatPool": {
-            "condition": "[and(not(equals(toLower(parameters('externalLoadBalancerName')), string('none'))), greater(parameters('numberPublicMgmtIpAddresses'), 0))]",
-            "type": "string",
-            "value": "[resourceId('Microsoft.Network/loadBalancers/inboundNatPools', parameters('externalLoadBalancerName'), 'sshnatpool')]"
-        },
         "internalBackEndLoadBalancerId": {
             "condition": "[not(equals(toLower(parameters('internalLoadBalancerName')), string('none')))]",
             "type": "string",
