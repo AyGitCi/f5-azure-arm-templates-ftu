@@ -2,13 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "2.2.0.0",
     "parameters": {
-        "createNatGateway": {
-            "defaultValue": false,
-            "metadata": {
-                "description": "You must select Yes to create a NAT gateway to allow outbound access when deploying a standalone BIG-IP VE without a public management IP address. Note: The NAT gateway is applied to subnet0."
-            },
-            "type": "bool"
-        },
         "numSubnets": {
             "defaultValue": 1,
             "type": "Int",
@@ -54,15 +47,12 @@
                         "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.', copyIndex('constructSubnetArray'),'.0/24')]",
                         "routeTable": {
                             "id": "[resourceId('Microsoft.Network/routeTables', concat('routeTable-subnet', copyIndex('constructSubnetArray')))]"
-                        },
-                        "natGateway": "[if(and(equals(copyIndex('constructSubnetArray'), 0), parameters('createNatGateway')), json(concat('{\"id\": \"', resourceId('Microsoft.Network/natGateways', variables('natGatewayName')), '\"}')), json('null'))]"
+                        }
                     }
                 },
                 "name": "constructSubnetArray"
             }
-        ],
-        "natGatewayName": "[concat(parameters('vnetName'), '-natgw')]",
-        "natGatewayPublicIpName": "[concat(parameters('vnetName'), '-natgw-pip')]"
+        ]
     },
     "resources": [
         {
@@ -77,48 +67,10 @@
             "tags": "[if(empty(parameters('tagValues')), json('null'), parameters('tagValues'))]"
         },
         {
-            "apiVersion": "2020-06-01",
-            "condition": "[parameters('createNatGateway')]",
-            "location": "[resourceGroup().location]",
-            "name": "[variables('natGatewayPublicIpName')]",
-            "properties": {
-                "idleTimeoutInMinutes": 30,
-                "publicIPAllocationMethod": "Static"
-            },
-            "sku": {
-                "name": "Standard"
-            },
-            "tags": "[if(empty(parameters('tagValues')), json('null'), parameters('tagValues'))]",
-            "type": "Microsoft.Network/publicIPAddresses"
-        },
-        {
-            "apiVersion": "2020-06-01",
-            "dependsOn": [
-                "[variables('natGatewayPublicIpName')]"
-            ],
-            "location": "[resourceGroup().location]",
-            "condition": "[parameters('createNatGateway')]",
-            "name": "[variables('natGatewayName')]",
-            "sku": {
-                "name": "Standard"
-            },
-            "properties": {
-                "idleTimeoutInMinutes": 4,
-                "publicIpAddresses": [
-                    {
-                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('natGatewayPublicIpName'))]"
-                    }
-                ]
-            },
-            "tags": "[if(empty(parameters('tagValues')), json('null'), parameters('tagValues'))]",
-            "type": "Microsoft.Network/natGateways"
-        },
-        {
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2020-06-01",
             "dependsOn": [
-                "routeTableLoop",
-                "[resourceId('Microsoft.Network/natGateways', variables('natGatewayName'))]"
+                "routeTableLoop"
             ],
             "name": "[parameters('vnetName')]",
             "location": "[resourceGroup().location]",
@@ -141,10 +93,6 @@
                 "input": "[resourceId('Microsoft.Network/routeTables', concat('routeTable-subnet', copyIndex()))]"
             },
             "type": "Array"
-        },
-        "natGateway": {
-            "type": "string",
-            "value": "[resourceId('Microsoft.Network/natGateways', variables('natGatewayName'))]"
         },
         "subnets": {
             "condition": "[greaterOrEquals(parameters('numSubnets'), 1)]",
