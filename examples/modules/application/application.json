@@ -16,7 +16,7 @@
             "type":"string"
         },
         "createAutoscaleGroup":{
-            "defaultValue":true,
+            "defaultValue":false,
             "metadata":{
                 "description":"Choose true to create the application instances in an autoscaling configuration."
             },
@@ -80,7 +80,7 @@
             "type":"object"
         },
         "vmScaleSetMaxCount":{
-            "defaultValue":10,
+            "defaultValue":1,
             "metadata":{
                 "description":"The maximum number of Application instances that can be deployed into the VM Scale Set."
             },
