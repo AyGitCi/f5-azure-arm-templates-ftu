@@ -8,7 +8,7 @@
     "tagValues": {
       "value": {
         "application": "APP",
-        "cost": "COST",
+        "Cost Center": "FTU",
         "environment": "ENV",
         "group": "GROUP",
         "owner": "OWNER"
